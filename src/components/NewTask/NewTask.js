@@ -23,12 +23,12 @@ const NewTask = (props) => {
             );
 
             if (!response.ok) {
-                throw new Error("Request failed!");
+                throw new Error("Zahtjev neuspješan!");
             }
 
             const data = await response.json();
 
-            const generatedId = data.name; // firebase-specific => "name" contains generated id
+            const generatedId = data.name;
             const createdTask = { id: generatedId, text: taskText };
 
             props.onAddTask(createdTask);

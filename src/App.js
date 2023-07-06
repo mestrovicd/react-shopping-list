@@ -8,7 +8,7 @@ function App() {
     const [error, setError] = useState(null);
     const [tasks, setTasks] = useState([]);
 
-    const fetchTasks = async (taskText) => {
+    const fetchTasks = async () => {
         setIsLoading(true);
         setError(null);
         try {
@@ -17,7 +17,7 @@ function App() {
             );
 
             if (!response.ok) {
-                throw new Error("Request failed!");
+                throw new Error("Greška!");
             }
 
             const data = await response.json();
@@ -39,8 +39,80 @@ function App() {
         fetchTasks();
     }, []);
 
-    const taskAddHandler = (task) => {
-        setTasks((prevTasks) => prevTasks.concat(task));
+    const taskAddHandler = async (task) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(
+                "https://react-tasks-c0e93-default-rtdb.firebaseio.com/shop.json",
+                {
+                    method: "POST",
+                    body: JSON.stringify({ text: task.text }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Zahtjev neuspješan!");
+            }
+
+            const data = await response.json();
+
+            const createdTask = { id: data.name, text: task.text };
+
+            setTasks((prevTasks) => [...prevTasks, createdTask]);
+        } catch (err) {
+            setError(err.message || "Something went wrong!");
+        }
+        setIsLoading(false);
+    };
+
+    const taskRemoveHandler = async (taskId) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(
+                `https://react-tasks-c0e93-default-rtdb.firebaseio.com/shop/${taskId}.json`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Zahtjev neuspješan!");
+            }
+
+            setTasks((prevTasks) =>
+                prevTasks.filter((task) => task.id !== taskId)
+            );
+        } catch (err) {
+            setError(err.message || "Something went wrong!");
+        }
+        setIsLoading(false);
+    };
+
+    const removeAllTasksHandler = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(
+                "https://react-tasks-c0e93-default-rtdb.firebaseio.com/shop.json",
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Zahtjev neuspješan!");
+            }
+
+            setTasks([]);
+        } catch (err) {
+            setError(err.message || "Something went wrong!");
+        }
+        setIsLoading(false);
     };
 
     return (
@@ -51,6 +123,8 @@ function App() {
                 loading={isLoading}
                 error={error}
                 onFetch={fetchTasks}
+                onRemoveTask={taskRemoveHandler}
+                onRemoveAllTasks={removeAllTasksHandler}
             />
         </React.Fragment>
     );
