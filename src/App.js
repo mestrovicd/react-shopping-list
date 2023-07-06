@@ -24,15 +24,8 @@ function App() {
 
             const loadedTasks = [];
 
-            // Create a set to track duplicate task texts
-            const duplicateTexts = new Set();
-
             for (const taskKey in data) {
-                const task = data[taskKey];
-                if (!duplicateTexts.has(task.text)) {
-                    loadedTasks.push({ id: taskKey, text: task.text });
-                    duplicateTexts.add(task.text);
-                }
+                loadedTasks.push({ id: taskKey, text: data[taskKey].text });
             }
 
             setTasks(loadedTasks);
@@ -46,42 +39,8 @@ function App() {
         fetchTasks();
     }, []);
 
-    const taskAddHandler = async (task) => {
-        console.log("taskAddHandler called");
-        setIsLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(
-                "https://react-tasks-c0e93-default-rtdb.firebaseio.com/shop.json",
-                {
-                    method: "POST",
-                    body: JSON.stringify({ text: task.text }),
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Zahtjev neuspješan!");
-            }
-
-            const data = await response.json();
-            const createdTask = { id: data.name, text: task.text };
-
-            const duplicateTask = tasks.find((t) => t.text === task.text);
-            if (duplicateTask) {
-                const updatedTasks = tasks.filter(
-                    (t) => t.id !== duplicateTask.id
-                );
-                setTasks(updatedTasks);
-            }
-
-            setTasks((prevTasks) => [...prevTasks, createdTask]);
-        } catch (err) {
-            setError(err.message || "Something went wrong!");
-        }
-        setIsLoading(false);
+    const taskAddHandler = (task) => {
+        setTasks((prevTasks) => [...prevTasks, task]);
     };
 
     const taskRemoveHandler = async (taskId) => {
