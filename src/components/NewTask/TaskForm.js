@@ -18,7 +18,11 @@ const TaskForm = (props) => {
 
     return (
         <form className={classes.form} onSubmit={submitHandler}>
-            <input type="text" ref={taskInputRef} />
+            <input
+                type="text"
+                ref={taskInputRef}
+                placeholder="Upiši ovdje..."
+            />
             <button>{props.loading ? "Šaljem..." : "Dodaj"}</button>
         </form>
     );
